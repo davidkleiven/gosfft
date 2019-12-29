@@ -27,3 +27,36 @@ func TestProd(t *testing.T) {
 		}
 	}
 }
+
+func TestExtractComplex(t *testing.T) {
+	for i, test := range []struct {
+		seq    []complex128
+		expect []complex128
+		step   int
+	}{
+		{
+			seq:    []complex128{complex(1, 0), complex(2, 0), complex(3, 0), complex(4, 0)},
+			expect: []complex128{complex(1, 0), complex(3, 0)},
+			step:   2,
+		},
+		{
+			seq:    []complex128{complex(1, 0), complex(2, 0), complex(3, 0), complex(4, 0)},
+			expect: []complex128{complex(1, 0)},
+			step:   3,
+		},
+		{
+			seq:    []complex128{complex(1, 0), complex(2, 0), complex(3, 0)},
+			expect: []complex128{complex(1, 0), complex(3, 0)},
+			step:   2,
+		},
+	} {
+		res := extractComplex(test.seq, 0, test.step)
+		tol := 1e-10
+		for j := range res {
+			if !CmplxEqualApprox(res[j], test.expect[j], tol) {
+				t.Errorf("Test #%d: Expected %v got %v\n", i, test.expect, res)
+				break
+			}
+		}
+	}
+}
