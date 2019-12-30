@@ -1,6 +1,10 @@
 package sfft
 
-import "testing"
+import (
+	"testing"
+
+	"gonum.org/v1/gonum/mat"
+)
 
 func TestProd(t *testing.T) {
 	for i, test := range []struct {
@@ -59,4 +63,39 @@ func TestExtractComplex(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestCenter2(t *testing.T) {
+	matrix := mat.NewCDense(4, 4, nil)
+	for i := 0; i < 4; i++ {
+		for j := 0; j < 4; j++ {
+			matrix.Set(i, j, complex(float64(i*4+j), 0))
+		}
+	}
+
+	Center2(matrix)
+
+	expect := mat.NewCDense(4, 4, []complex128{
+		complex(10, 0), complex(11, 0), complex(8, 0), complex(9, 0),
+		complex(14, 0), complex(15, 0), complex(12, 0), complex(13, 0),
+		complex(2, 0), complex(3, 0), complex(0, 0), complex(1, 0),
+		complex(6, 0), complex(7, 0), complex(4, 0), complex(5, 0),
+	})
+
+	if !mat.CEqualApprox(matrix, expect, 1e-10) {
+		rMat := realPart(matrix)
+		rExp := realPart(expect)
+		t.Errorf("Unexpected shift. Expected\n%v\nGot\n%v\n", mat.Formatted(rExp), mat.Formatted(rMat))
+	}
+}
+
+func realPart(m *mat.CDense) *mat.Dense {
+	nr, nc := m.Dims()
+	rMat := mat.NewDense(nr, nc, nil)
+	for i := 0; i < nr; i++ {
+		for j := 0; j < nc; j++ {
+			rMat.Set(i, j, real(m.At(i, j)))
+		}
+	}
+	return rMat
 }

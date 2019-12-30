@@ -9,6 +9,7 @@ script:
 - "$HOME/gopath/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken
   $COVERALLS_TOKEN"
 - go run examples/fft1d/main.go
+- go run examples/fft2d/main.go
 - rm *.png
 
 env:
