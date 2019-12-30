@@ -46,3 +46,38 @@ func insertComplex(dst []complex128, data []complex128, start int, step int) {
 func CmplxEqualApprox(a complex128, b complex128, tol float64) bool {
 	return math.Abs(real(a)-real(b)) < tol && math.Abs(imag(a)-imag(b)) < tol
 }
+
+// Mutable2 is a generic interface for a type where elements can be accessed via the
+// At method and altered via the Set method
+type Mutable2 interface {
+	// At returns the (i, j) element
+	At(i, j int) complex128
+
+	// Set sets a new value for the element at (i, j)
+	Set(i, j int, v complex128)
+
+	// Dims return the size of the data
+	Dims() (int, int)
+}
+
+// Center2 puts the origin at the center of the image of a 2D transform
+func Center2(data Mutable2) {
+	nr, nc := data.Dims()
+	for i := 0; i < nr; i++ {
+		for j := 0; j < nc/2; j++ {
+			v1 := data.At(i, j)
+			v2 := data.At(i, nc/2+j)
+			data.Set(i, j, v2)
+			data.Set(i, nc/2+j, v1)
+		}
+	}
+
+	for i := 0; i < nr/2; i++ {
+		for j := 0; j < nc; j++ {
+			v1 := data.At(i, j)
+			v2 := data.At(nr/2+i, j)
+			data.Set(i, j, v2)
+			data.Set(nr/2+i, j, v1)
+		}
+	}
+}

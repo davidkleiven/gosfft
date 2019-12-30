@@ -13,3 +13,9 @@ Below is a selection of examples whoen
 Fourier transform of a square pulse
 
 ![Signal 1D](figs/signal1D.png) ![Fourier Transform](figs/fft1D.png)
+
+## [2D fourier transform](examples/fft2d/main.go)
+
+Fourier transform of a square
+
+![Signal 2D](figs/img.png) ![Fourier Transform](figs/fft2D.png)
