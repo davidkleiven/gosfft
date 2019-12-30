@@ -117,3 +117,79 @@ func TestFFT2Freq(t *testing.T) {
 	}
 
 }
+
+func TestFFT3(t *testing.T) {
+	data := []float64{0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 0.0, 0.0, 0.0,
+
+		0.0, 0.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0,
+		0.0, 1.0, 0.0, 0.0}
+
+	cmplxData := ToComplex(data)
+	ft := NewFFT3(3, 4, 2)
+	ftData := ft.FFT(cmplxData)
+
+	expectFt := make([]complex128, 24)
+	for j := 0; j < 4; j++ {
+		for i := 0; i < 3; i++ {
+			for d := 0; d < 2; d++ {
+				exp1 := cmplx.Exp(complex(0.0, -0.5*math.Pi*float64(j)))
+				exp2 := cmplx.Exp(complex(0.0, -math.Pi*float64(d)))
+				exp3 := cmplx.Exp(complex(0.0, -2.0*math.Pi*float64(i)/3.0))
+				exp4 := cmplx.Exp(complex(0.0, -4.0*math.Pi*float64(i)/3.0))
+				expectFt[d*12+i*4+j] = exp1 * exp2 * (exp3 + exp4)
+			}
+		}
+	}
+
+	tol := 1e-10
+	for i := range expectFt {
+		if !CmplxEqualApprox(expectFt[i], ftData[i], tol) {
+			t.Errorf("UnexpectedFT %d: Expected %v got %v", i, expectFt[i], ftData[i])
+		}
+	}
+
+	ifft := ft.IFFT(ftData)
+	for i := range ifft {
+		if math.Abs(real(ifft[i])-24*data[i]) > tol || math.Abs(imag(ifft[i])) > tol {
+			t.Errorf("Inverse FFT does not match %d: Expected (%f, 0.0) got %v", i, 24*data[i], ifft[i])
+		}
+	}
+}
+
+func TestFFT3FreqSymmetry(t *testing.T) {
+	data := []float64{0.0, 0.0, 1.0, 2.0,
+		0.0, 2.0, 1.0, 4.0,
+		0.0, 2.0, 1.0, 5.0,
+
+		0.0, 1.0, -1.0, 2.0,
+		-1.0, 2.0, 3.0, 4.0,
+		1.0, 2.0, 4.0, 5.0}
+	cmplxData := ToComplex(data)
+
+	ft := NewFFT3(3, 4, 2)
+	ftData := ft.FFT(cmplxData)
+
+	num := 0
+	for i := 1; i < len(ftData); i++ {
+		f1 := ft.Freq(i)
+		for j := 1; j < len(ftData); j++ {
+			f2 := ft.Freq(j)
+			f2[0] = -f2[0]
+			f2[1] = -f2[1]
+			f2[2] = -f2[2]
+			if floats.EqualApprox(f1, f2, 1e-10) {
+				num++
+				if math.Abs(cmplx.Abs(ftData[i])-cmplx.Abs(ftData[j])) > 1e-10 {
+					t.Errorf("Conjugate property does not hold")
+				}
+			}
+		}
+	}
+
+	if num != 8 {
+		t.Errorf("Expected 8 conjugate pairs. Found %d", num)
+	}
+}
