@@ -4,6 +4,9 @@ import (
 	"gonum.org/v1/gonum/fourier"
 )
 
+// GonumFT is a type definition of Gonum's Coefficients and Sequence
+type GonumFT func(dst []complex128, data []complex128) []complex128
+
 // FFT1 is a data type for 1D FFTs
 type FFT1 struct {
 	ft *fourier.FFT
@@ -127,4 +130,99 @@ func (f *FFT2) Freq(i int) []float64 {
 		freqs[1] -= 1.0
 	}
 	return freqs
+}
+
+// FFT3 is a structure for performing 3D FFTs
+type FFT3 struct {
+	row   *fourier.CmplxFFT
+	col   *fourier.CmplxFFT
+	depth *fourier.CmplxFFT
+}
+
+// NewFFT3 returns a new 3D Fourier transform object
+func NewFFT3(nr, nc, nd int) *FFT3 {
+	return &FFT3{
+		row:   fourier.NewCmplxFFT(nc),
+		col:   fourier.NewCmplxFFT(nr),
+		depth: fourier.NewCmplxFFT(nd),
+	}
+}
+
+// FFT performs forward FFT
+func (f *FFT3) fourierTransform(data []complex128, tRow GonumFT, tCol GonumFT, tDepth GonumFT) []complex128 {
+	if len(data) != f.row.Len()*f.col.Len()*f.depth.Len() {
+		panic("FFT3: Inconsistent length of data")
+	}
+
+	nc := f.row.Len()
+	nr := f.col.Len()
+
+	// Perform FFT over first axis
+	for r := 0; r < nr; r++ {
+		for d := 0; d < f.depth.Len(); d++ {
+			row := data[d*nr*nc+r*nc : d*nr*nc+(r+1)*nc]
+			tRow(row, row)
+		}
+	}
+
+	// Perform FFT over second axis
+	for d := 0; d < f.depth.Len(); d++ {
+		plane := data[d*nr*nc : (d+1)*nr*nc]
+		for c := 0; c < nc; c++ {
+			col := extractComplex(plane, c, nc)
+			tCol(col, col)
+			insertComplex(plane, col, c, nc)
+		}
+	}
+
+	// Perform FFT over third axis
+	for r := 0; r < f.row.Len(); r++ {
+		for c := 0; c < f.col.Len(); c++ {
+			start := c*nc + r
+			seq := extractComplex(data, start, nr*nc)
+			tDepth(seq, seq)
+			insertComplex(data, seq, start, nr*nc)
+		}
+	}
+	return data
+}
+
+// FFT performs forward fourier transform
+func (f *FFT3) FFT(data []complex128) []complex128 {
+	return f.fourierTransform(data, f.row.Coefficients, f.col.Coefficients, f.depth.Coefficients)
+}
+
+// IFFT performs the inverse fourier transform
+func (f *FFT3) IFFT(data []complex128) []complex128 {
+	return f.fourierTransform(data, f.row.Sequence, f.col.Sequence, f.depth.Sequence)
+}
+
+// Freq returns the frequency correpsondex to index i in the array returned
+// by FFT
+func (f *FFT3) Freq(i int) []float64 {
+	nr := f.col.Len()
+	nc := f.row.Len()
+	nd := f.depth.Len()
+
+	c := i % nc
+	r := (i / nc) % nr
+	d := i / (nr * nc)
+
+	freq := make([]float64, 3)
+	freq[0] = float64(c) / float64(nc)
+	freq[1] = float64(r) / float64(nr)
+	freq[2] = float64(d) / float64(nd)
+
+	if c > nc/2 {
+		freq[0] -= 1.0
+	}
+
+	if r > nr/2 {
+		freq[1] -= 1.0
+	}
+
+	if d > nd/2 {
+		freq[2] -= 1.0
+	}
+	return freq
 }
