@@ -17,6 +17,12 @@ func TestCMat3(t *testing.T) {
 		}
 	}
 
+	nr, nc, nd := mat1.Dims()
+
+	if nr != 1 || nc != 2 || nd != 3 {
+		t.Errorf("Unexpected dimensions")
+	}
+
 	// Test initialize with an array
 	mat2 := NewCMat3(1, 2, 3, expectData)
 	if !CmplxEqualApprox(mat2.At(0, 0, 0), complex(1.0, 0.0), 1e-10) {
