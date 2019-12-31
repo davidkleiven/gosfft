@@ -81,3 +81,40 @@ func Center2(data Mutable2) {
 		}
 	}
 }
+
+// Center3 brings the center of a 3D transform to the center
+func Center3(data *Mat3) {
+	nr, nc, nd := data.Dims()
+	for i := 0; i < nr; i++ {
+		for j := 0; j < nc; j++ {
+			for k := 0; k < nd/2; k++ {
+				v1 := data.At(i, j, k)
+				v2 := data.At(i, j, nd/2+k)
+				data.Set(i, j, k, v2)
+				data.Set(i, j, nd/2+k, v1)
+			}
+		}
+	}
+
+	for i := 0; i < nr; i++ {
+		for j := 0; j < nc/2; j++ {
+			for k := 0; k < nd; k++ {
+				v1 := data.At(i, j, k)
+				v2 := data.At(i, j+nc/2, k)
+				data.Set(i, j, k, v2)
+				data.Set(i, j+nc/2, k, v1)
+			}
+		}
+	}
+
+	for i := 0; i < nr/2; i++ {
+		for j := 0; j < nc; j++ {
+			for k := 0; k < nd; k++ {
+				v1 := data.At(i, j, k)
+				v2 := data.At(i+nr/2, j, k)
+				data.Set(i, j, k, v2)
+				data.Set(i+nr/2, j, k, v1)
+			}
+		}
+	}
+}

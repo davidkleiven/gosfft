@@ -3,6 +3,7 @@ package sfft
 import (
 	"testing"
 
+	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/mat"
 )
 
@@ -86,6 +87,17 @@ func TestCenter2(t *testing.T) {
 		rMat := realPart(matrix)
 		rExp := realPart(expect)
 		t.Errorf("Unexpected shift. Expected\n%v\nGot\n%v\n", mat.Formatted(rExp), mat.Formatted(rMat))
+	}
+}
+
+func TestCenter3(t *testing.T) {
+	data := []float64{0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0}
+	mat3 := NewMat3(2, 2, 2, data)
+	Center3(mat3)
+	expect := []float64{7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0, 0.0}
+
+	if !floats.EqualApprox(data, expect, 1e-10) {
+		t.Errorf("Unexpected after centered.\nExpected\n%v\nGot\n%v\n", expect, data)
 	}
 }
 

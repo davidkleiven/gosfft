@@ -19,3 +19,12 @@ Fourier transform of a square pulse
 Fourier transform of a square
 
 ![Signal 2D](figs/img.png) ![Fourier Transform](figs/fft2D.png)
+
+## [3D fourier transform](examples/fft3d/main.go)
+
+Fourier transform of a 3D cube
+
+<p float="left">
+    <img src="figs/img3D.png" width="400">
+    <img src="figs/fft3D.png" width="400">
+</p>
