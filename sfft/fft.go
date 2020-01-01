@@ -1,3 +1,5 @@
+// Package sfft provides a set of method to simplify calculations of 2D and 3D
+// FFTs. It is solely based on the 1D FFT method provided by Gonum.
 package sfft
 
 import (
