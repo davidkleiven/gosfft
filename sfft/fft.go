@@ -13,7 +13,8 @@ type FFT1 struct {
 	n  int
 }
 
-// NewFFT1 creates a new type for FFT1. Size is the length of the size
+// NewFFT1 creates a new type for FFT1. Size is the length of the array that will be
+// Fourier Transformed
 func NewFFT1(size int) *FFT1 {
 	return &FFT1{
 		ft: fourier.NewFFT(size),
@@ -38,7 +39,8 @@ func (f *FFT1) IFFT(coeff []complex128) []float64 {
 	return dst
 }
 
-// Freq return the frequency corresponding to the coefficient at index i
+// Freq return the frequency corresponding to the coefficient at index i. The spacing
+// is assumed to be 1.0
 func (f *FFT1) Freq(i int) float64 {
 	freq := float64(i) / float64(f.n)
 	if i > f.n/2 {
@@ -113,7 +115,7 @@ func (f *FFT2) IFFT(coeff []complex128) []complex128 {
 }
 
 // Freq return the 2D frequency corresponding to index i in the array returned by
-// FFT
+// FFT. The spacing is assumed to be 1.0
 func (f *FFT2) Freq(i int) []float64 {
 	col := i % f.nc
 	row := i / f.nc
@@ -139,7 +141,8 @@ type FFT3 struct {
 	depth *fourier.CmplxFFT
 }
 
-// NewFFT3 returns a new 3D Fourier transform object
+// NewFFT3 returns a new 3D Fourier transform object. nr is the number of rows,
+// nc is the number of columns and nd is the number of nr x nc "sheets"
 func NewFFT3(nr, nc, nd int) *FFT3 {
 	return &FFT3{
 		row:   fourier.NewCmplxFFT(nc),
@@ -148,7 +151,9 @@ func NewFFT3(nr, nc, nd int) *FFT3 {
 	}
 }
 
-// FFT performs forward FFT
+// fourierTransform performs forward FFT or backward FFT depending on the functions passed. tRow
+// is the function used to perform FT over rows, tCol is the function used to perform FT over columns
+// and tDepth is the function used to perform FT in the third direction
 func (f *FFT3) fourierTransform(data []complex128, tRow GonumFT, tCol GonumFT, tDepth GonumFT) []complex128 {
 	if len(data) != f.row.Len()*f.col.Len()*f.depth.Len() {
 		panic("FFT3: Inconsistent length of data")
@@ -187,12 +192,14 @@ func (f *FFT3) fourierTransform(data []complex128, tRow GonumFT, tCol GonumFT, t
 	return data
 }
 
-// FFT performs forward fourier transform
+// FFT performs forward fourier transform. The length of the passed array has to be equal to
+// nr*nc*nd, where nr, nc and nd are the values passed to NewFFT3
 func (f *FFT3) FFT(data []complex128) []complex128 {
 	return f.fourierTransform(data, f.row.Coefficients, f.col.Coefficients, f.depth.Coefficients)
 }
 
-// IFFT performs the inverse fourier transform
+// IFFT performs the inverse fourier transform. The length of the passed array has to match
+// the one returned by FFT (e.g. nr*nc*nd)
 func (f *FFT3) IFFT(data []complex128) []complex128 {
 	return f.fourierTransform(data, f.row.Sequence, f.col.Sequence, f.depth.Sequence)
 }
