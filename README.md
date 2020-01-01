@@ -1,6 +1,7 @@
 # gosfft
 ![Build status](https://travis-ci.org/davidkleiven/gosfft.svg?branch=master)
 [![Coverage Status](https://coveralls.io/repos/github/davidkleiven/gosfft/badge.svg?branch=master)](https://coveralls.io/github/davidkleiven/gosfft?branch=master)
+[![Go Report Card](https://goreportcard.com/badge/github.com/davidkleiven/gosfft)](https://goreportcard.com/report/github.com/davidkleiven/gosfft)
 
 Simple FFT (SFFT) is a simple FFT library that is based on Gonum's FFT routine. It implements a simple interface for 1D, 2D and 3D transforms.
 

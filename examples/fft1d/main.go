@@ -37,6 +37,9 @@ func main() {
 	}
 
 	l, err := plotter.NewLine(pts)
+	if err != nil {
+		panic(err)
+	}
 	pltSignal.Add(l)
 	// Plot the frequency spectrum
 	pltFreq, err := plot.New()

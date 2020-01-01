@@ -16,9 +16,16 @@ type GridMatrix struct {
 	mat mat.Matrix
 }
 
-func (g GridMatrix) Dims() (int, int)   { r, c := g.mat.Dims(); return r, c }
-func (g GridMatrix) X(c int) float64    { return float64(c) }
-func (g GridMatrix) Y(r int) float64    { return float64(r) }
+// Dims return the size of the underlying matrix
+func (g GridMatrix) Dims() (int, int) { r, c := g.mat.Dims(); return r, c }
+
+// X returns the coordinate value corresponding to column c
+func (g GridMatrix) X(c int) float64 { return float64(c) }
+
+// Y returns the coordinate value corresponiding to the row r
+func (g GridMatrix) Y(r int) float64 { return float64(r) }
+
+// Z returns the function value corresponding to the (r, c) element in the underlying matrix
 func (g GridMatrix) Z(c, r int) float64 { return g.mat.At(r, c) }
 
 func main() {
