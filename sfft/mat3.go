@@ -21,7 +21,8 @@ func (f flattened3) Dims() (int, int, int) {
 	return f.nr, f.nc, f.nd
 }
 
-// CMat3 is a type that represents a 3D array.
+// CMat3 is a type that represents a 3D array. If the size is (nr, nc, nd) the relation
+// between 3D index (i, j, k) and the flatted Data array is:  (i, j, k) -> k*nr*nc + i*nc + j
 type CMat3 struct {
 	Data []complex128
 	f    flattened3
@@ -42,7 +43,10 @@ func (m *CMat3) Set(i, j, k int, v complex128) {
 	m.Data[m.f.Index(i, j, k)] = v
 }
 
-// NewCMat3 returns a new CMat3 instance
+// NewCMat3 returns a new CMat3 instance. nr is the number of rows, nc is the number of columns
+// nd is the number of nr x nc "sheets". The data argument can either be an array of length nr*nc*nd
+// or nil. If it is nil the 3D array will be initialized with zeros, otherwise the passed array is used
+// as initial values
 func NewCMat3(nr, nc, nd int, data []complex128) *CMat3 {
 	var v CMat3
 	if data == nil {
@@ -57,7 +61,9 @@ func NewCMat3(nr, nc, nd int, data []complex128) *CMat3 {
 	return &v
 }
 
-// Mat3 is a structure represen {ting a 3D array with floats
+// Mat3 is a structure represents a 3D array with floats. It is the real variant of
+// CMat3. When the size of the 3D array is (nr, nc, nd) the mapping from 3D indices
+// to the flattened Data array is (i, j, k) -> k*nr*nc + i*nc + j
 type Mat3 struct {
 	Data []float64
 	f    flattened3
@@ -78,7 +84,10 @@ func (m *Mat3) Set(i, j, k int, v float64) {
 	m.Data[m.f.Index(i, j, k)] = v
 }
 
-// NewMat3 returns a new instance of the Mat3 struct
+// NewMat3 returns a new instance of the Mat3 struct. nr is the number of rows,
+// nc is the number of columns and nd is the number of nr x nc "sheets". data can
+// either be an array of length nr*nc*nd or nil. If it is nil, the underlying data
+// is initialized to zero, otherwise the passed data array is used
 func NewMat3(nr, nc, nd int, data []float64) *Mat3 {
 	var v Mat3
 	if data == nil {

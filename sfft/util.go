@@ -11,7 +11,8 @@ func prod(x []int) int {
 	return res
 }
 
-// ToComplex returns a complex representation of a real slice
+// ToComplex returns a complex representation of a real slice. The real part of the returned array
+// is equal to the passed array, and the imaginary part is set to zero
 func ToComplex(data []float64) []complex128 {
 	res := make([]complex128, len(data))
 	for i := range data {
@@ -42,7 +43,8 @@ func insertComplex(dst []complex128, data []complex128, start int, step int) {
 	}
 }
 
-// CmplxEqualApprox checks if a and b is equal
+// CmplxEqualApprox checks if a and b is equal. a and b is considered equal if
+// their real and imaginary parts are equal within tol
 func CmplxEqualApprox(a complex128, b complex128, tol float64) bool {
 	return math.Abs(real(a)-real(b)) < tol && math.Abs(imag(a)-imag(b)) < tol
 }
@@ -60,7 +62,7 @@ type Mutable2 interface {
 	Dims() (int, int)
 }
 
-// Center2 puts the origin at the center of the image of a 2D transform
+// Center2 puts the origin a(i.e. zero frequency) t the center of the image of a 2D transform
 func Center2(data Mutable2) {
 	nr, nc := data.Dims()
 	for i := 0; i < nr; i++ {
@@ -82,7 +84,7 @@ func Center2(data Mutable2) {
 	}
 }
 
-// Center3 brings the center of a 3D transform to the center
+// Center3 brings the center (i.e. zero frequency) of a 3D transform to the center of the 3D array
 func Center3(data *Mat3) {
 	nr, nc, nd := data.Dims()
 	for i := 0; i < nr; i++ {
