@@ -79,3 +79,98 @@ func (f *FFT2Par) IFFT(data []complex128) []complex128 {
 func (f *FFT2Par) Freq(i int) []float64 {
 	return f.Transformers[0].Freq(i)
 }
+
+// FFT3Par is type used to perform three dimensional FFTs with multiple workers
+type FFT3Par struct {
+	Transforms []*FFT3
+}
+
+// NewFFT3Par returns a new instance of FFT3Par. nr is the number of rows, nc is
+// the number of columns, nd is the number of "planes" and nWorkers is the number
+// of workers. Note that both the number of rows and the number of columns has to
+// be divisible by the number of workers
+func NewFFT3Par(nr, nc, nd, nWorkers int) *FFT3Par {
+	if nr%nWorkers != 0 || nc%nWorkers != 0 {
+		panic("fftpar: The number of rows and the number of columns must be divisible by the number of workers")
+	}
+	var ft FFT3Par
+	ft.Transforms = make([]*FFT3, nWorkers)
+	for i := 0; i < nWorkers; i++ {
+		ft.Transforms[i] = NewFFT3(nr, nc, nd)
+		rowsPerWorker := nr / nWorkers
+		colsPerWorker := nc / nWorkers
+		ft.Transforms[i].rows = ft.Transforms[i].rows[i*rowsPerWorker : (i+1)*rowsPerWorker]
+		ft.Transforms[i].cols = ft.Transforms[i].cols[i*colsPerWorker : (i+1)*colsPerWorker]
+	}
+	return &ft
+}
+
+// FFT performs forward fourier transform
+func (f *FFT3Par) FFT(data []complex128) []complex128 {
+	var wg sync.WaitGroup
+	for i := range f.Transforms {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			f.Transforms[num].RowTransform(data, f.Transforms[num].row.Coefficients)
+		}(i)
+	}
+	wg.Wait()
+
+	for i := range f.Transforms {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			f.Transforms[num].ColTransform(data, f.Transforms[num].col.Coefficients)
+		}(i)
+	}
+	wg.Wait()
+
+	for i := range f.Transforms {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			f.Transforms[num].DepthTransform(data, f.Transforms[num].depth.Coefficients)
+		}(i)
+	}
+	wg.Wait()
+	return data
+}
+
+// IFFT performs backward fourier transform
+func (f *FFT3Par) IFFT(data []complex128) []complex128 {
+	var wg sync.WaitGroup
+	for i := range f.Transforms {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			f.Transforms[num].RowTransform(data, f.Transforms[num].row.Sequence)
+		}(i)
+	}
+	wg.Wait()
+
+	for i := range f.Transforms {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			f.Transforms[num].ColTransform(data, f.Transforms[num].col.Sequence)
+		}(i)
+	}
+	wg.Wait()
+
+	for i := range f.Transforms {
+		wg.Add(1)
+		go func(num int) {
+			defer wg.Done()
+			f.Transforms[num].DepthTransform(data, f.Transforms[num].depth.Sequence)
+		}(i)
+	}
+	wg.Wait()
+	return data
+}
+
+// Freq returns the frequency corresponding to the i-th item in the array returned
+// by FFT
+func (f *FFT3Par) Freq(i int) []float64 {
+	return f.Transforms[0].Freq(i)
+}

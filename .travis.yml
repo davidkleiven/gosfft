@@ -12,6 +12,7 @@ script:
 - go run examples/fft2d/main.go
 - go run examples/fft3d/main.go
 - go run cmd/gosfft-time-fft2/main.go
+- go run cmd/gosfft-time-fft3/main.go
 - rm *.png
 - rm *.bin
 
