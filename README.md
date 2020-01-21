@@ -33,6 +33,7 @@ Fourier transform of a 3D cube
 ## Parallelization
 GOSFFT implements parallel versions of the multidimensional FFTs. In the following [testcase](cmd/gosfft-time-fft2/main.go) a 
 2D 128 x 128 matrix is Fourier Transformed. The following results where obtained (Intel(R) Core(TM) i7-7700 CPU @ 3.60GHz)
+
 | Number of workers | Execution time per FFT |
 | ----------------- | ---------------------- |
 | 1                 | 1.34 ms                |
