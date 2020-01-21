@@ -57,15 +57,27 @@ type FFT2 struct {
 	ftCol *fourier.CmplxFFT
 	nr    int
 	nc    int
+	cols  []int
+	rows  []int
 }
 
 // NewFFT2 return a new FFT2. nr is the number of rows, and nc is the number of columns
 func NewFFT2(nr, nc int) *FFT2 {
+	cols := make([]int, nc)
+	rows := make([]int, nr)
+	for i := 0; i < nc; i++ {
+		cols[i] = i
+	}
+	for i := 0; i < nr; i++ {
+		rows[i] = i
+	}
 	return &FFT2{
 		ftRow: fourier.NewCmplxFFT(nc),
 		ftCol: fourier.NewCmplxFFT(nr),
 		nr:    nr,
 		nc:    nc,
+		cols:  cols,
+		rows:  rows,
 	}
 }
 
@@ -77,17 +89,25 @@ func (f *FFT2) FFT(data []complex128) []complex128 {
 	if len(data) != f.nr*f.nc {
 		panic("FFT: Inconsistent size in 2D FFT")
 	}
+	f.RowTransform(data, f.ftRow.Coefficients)
+	f.ColTransform(data, f.ftCol.Coefficients)
+	return data
+}
 
-	// Perform first axis transform
-	for r := 0; r < f.nr; r++ {
+// RowTransform performs inplace transform per row
+func (f *FFT2) RowTransform(data []complex128, op GonumFT) []complex128 {
+	for _, r := range f.rows {
 		row := data[r*f.nc : (r+1)*f.nc]
-		f.ftRow.Coefficients(row, row)
+		op(row, row)
 	}
+	return data
+}
 
-	// Perform second axis transform
-	for c := 0; c < f.nc; c++ {
+// ColTransform performs in-place transform over columns
+func (f *FFT2) ColTransform(data []complex128, op GonumFT) []complex128 {
+	for _, c := range f.cols {
 		col := extractComplex(data, c, f.nc)
-		f.ftCol.Coefficients(col, col)
+		op(col, col)
 		insertComplex(data, col, c, f.nc)
 	}
 	return data
@@ -100,19 +120,8 @@ func (f *FFT2) IFFT(coeff []complex128) []complex128 {
 	if len(coeff) != f.nr*f.nc {
 		panic("FFT: Inconsistent size in 2D FFT")
 	}
-
-	// Perform first axis transform
-	for r := 0; r < f.nr; r++ {
-		row := coeff[r*f.nc : (r+1)*f.nc]
-		f.ftRow.Sequence(row, row)
-	}
-
-	// Perform second axis transform
-	for c := 0; c < f.nc; c++ {
-		col := extractComplex(coeff, c, f.nc)
-		f.ftCol.Sequence(col, col)
-		insertComplex(coeff, col, c, f.nc)
-	}
+	f.RowTransform(coeff, f.ftRow.Sequence)
+	f.ColTransform(coeff, f.ftCol.Sequence)
 	return coeff
 }
 
