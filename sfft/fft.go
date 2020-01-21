@@ -147,18 +147,31 @@ func (f *FFT2) Freq(i int) []float64 {
 
 // FFT3 is a structure for performing 3D FFTs
 type FFT3 struct {
-	row   *fourier.CmplxFFT
-	col   *fourier.CmplxFFT
-	depth *fourier.CmplxFFT
+	row    *fourier.CmplxFFT
+	col    *fourier.CmplxFFT
+	depth  *fourier.CmplxFFT
+	rows   []int
+	cols   []int
+	planes []int
 }
 
 // NewFFT3 returns a new 3D Fourier transform object. nr is the number of rows,
 // nc is the number of columns and nd is the number of nr x nc "sheets"
 func NewFFT3(nr, nc, nd int) *FFT3 {
+	rows := make([]int, nr)
+	cols := make([]int, nc)
+	for i := 0; i < nr; i++ {
+		rows[i] = i
+	}
+	for i := 0; i < nc; i++ {
+		cols[i] = i
+	}
 	return &FFT3{
 		row:   fourier.NewCmplxFFT(nc),
 		col:   fourier.NewCmplxFFT(nr),
 		depth: fourier.NewCmplxFFT(nd),
+		rows:  rows,
+		cols:  cols,
 	}
 }
 
@@ -168,7 +181,7 @@ func (f *FFT3) RowTransform(data []complex128, op GonumFT) []complex128 {
 	nr := f.col.Len()
 
 	// Perform FFT over first axis
-	for r := 0; r < nr; r++ {
+	for _, r := range f.rows {
 		for d := 0; d < f.depth.Len(); d++ {
 			row := data[d*nr*nc+r*nc : d*nr*nc+(r+1)*nc]
 			op(row, row)
@@ -183,7 +196,7 @@ func (f *FFT3) ColTransform(data []complex128, op GonumFT) []complex128 {
 	nr := f.col.Len()
 	for d := 0; d < f.depth.Len(); d++ {
 		plane := data[d*nr*nc : (d+1)*nr*nc]
-		for c := 0; c < nc; c++ {
+		for _, c := range f.cols {
 			col := extractComplex(plane, c, nc)
 			op(col, col)
 			insertComplex(plane, col, c, nc)
@@ -196,9 +209,9 @@ func (f *FFT3) ColTransform(data []complex128, op GonumFT) []complex128 {
 func (f *FFT3) DepthTransform(data []complex128, op GonumFT) []complex128 {
 	nc := f.row.Len()
 	nr := f.col.Len()
-	for r := 0; r < f.row.Len(); r++ {
-		for c := 0; c < f.col.Len(); c++ {
-			start := c*nc + r
+	for _, r := range f.rows {
+		for c := 0; c < nc; c++ {
+			start := r*nc + c
 			seq := extractComplex(data, start, nr*nc)
 			op(seq, seq)
 			insertComplex(data, seq, start, nr*nc)

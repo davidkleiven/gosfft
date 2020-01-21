@@ -40,3 +40,12 @@ GOSFFT implements parallel versions of the multidimensional FFTs. In the followi
 | 2                 | 0.85 ms                |
 | 4                 | 0.67 ms                |
 | 8                 | 0.45 ms                |
+
+The [testcase](cmd/gosfft-time-fft3/main.go) runs a similar test in 3D for 128 x 128 x 128 dataset. The timing results are shown below
+
+| Number of workers | Execution time per FFT |
+| ----------------- | ---------------------- |
+| 1                 | 280 ms                 |
+| 2                 | 146 ms                 |
+| 4                 | 87 ms                  |
+| 8                 | 68 ms                  |
