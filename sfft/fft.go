@@ -162,14 +162,8 @@ func NewFFT3(nr, nc, nd int) *FFT3 {
 	}
 }
 
-// fourierTransform performs forward FFT or backward FFT depending on the functions passed. tRow
-// is the function used to perform FT over rows, tCol is the function used to perform FT over columns
-// and tDepth is the function used to perform FT in the third direction
-func (f *FFT3) fourierTransform(data []complex128, tRow GonumFT, tCol GonumFT, tDepth GonumFT) []complex128 {
-	if len(data) != f.row.Len()*f.col.Len()*f.depth.Len() {
-		panic("FFT3: Inconsistent length of data")
-	}
-
+// RowTransform performs FFT over rows
+func (f *FFT3) RowTransform(data []complex128, op GonumFT) []complex128 {
 	nc := f.row.Len()
 	nr := f.col.Len()
 
@@ -177,29 +171,52 @@ func (f *FFT3) fourierTransform(data []complex128, tRow GonumFT, tCol GonumFT, t
 	for r := 0; r < nr; r++ {
 		for d := 0; d < f.depth.Len(); d++ {
 			row := data[d*nr*nc+r*nc : d*nr*nc+(r+1)*nc]
-			tRow(row, row)
+			op(row, row)
 		}
 	}
+	return data
+}
 
-	// Perform FFT over second axis
+// ColTransform performs FFT over columns
+func (f *FFT3) ColTransform(data []complex128, op GonumFT) []complex128 {
+	nc := f.row.Len()
+	nr := f.col.Len()
 	for d := 0; d < f.depth.Len(); d++ {
 		plane := data[d*nr*nc : (d+1)*nr*nc]
 		for c := 0; c < nc; c++ {
 			col := extractComplex(plane, c, nc)
-			tCol(col, col)
+			op(col, col)
 			insertComplex(plane, col, c, nc)
 		}
 	}
+	return data
+}
 
-	// Perform FFT over third axis
+// DepthTransform performs FFT over the "depth" of a 3D matrix
+func (f *FFT3) DepthTransform(data []complex128, op GonumFT) []complex128 {
+	nc := f.row.Len()
+	nr := f.col.Len()
 	for r := 0; r < f.row.Len(); r++ {
 		for c := 0; c < f.col.Len(); c++ {
 			start := c*nc + r
 			seq := extractComplex(data, start, nr*nc)
-			tDepth(seq, seq)
+			op(seq, seq)
 			insertComplex(data, seq, start, nr*nc)
 		}
 	}
+	return data
+}
+
+// fourierTransform performs forward FFT or backward FFT depending on the functions passed. tRow
+// is the function used to perform FT over rows, tCol is the function used to perform FT over columns
+// and tDepth is the function used to perform FT in the third direction
+func (f *FFT3) fourierTransform(data []complex128, tRow GonumFT, tCol GonumFT, tDepth GonumFT) []complex128 {
+	if len(data) != f.row.Len()*f.col.Len()*f.depth.Len() {
+		panic("FFT3: Inconsistent length of data")
+	}
+	f.RowTransform(data, tRow)
+	f.ColTransform(data, tCol)
+	f.DepthTransform(data, tDepth)
 	return data
 }
 
