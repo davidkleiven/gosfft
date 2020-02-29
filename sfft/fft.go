@@ -3,7 +3,7 @@
 package sfft
 
 import (
-	"gonum.org/v1/gonum/fourier"
+	"gonum.org/v1/gonum/dsp/fourier"
 )
 
 // GonumFT is a type definition of Gonum's Coefficients and Sequence
