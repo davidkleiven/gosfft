@@ -62,18 +62,12 @@ func main() {
 	// Plot the results
 
 	gridImg := GridMatrix{img}
-	pltImg, err := plot.New()
-	if err != nil {
-		panic(err)
-	}
+	pltImg := plot.New()
 
 	im := plotter.NewHeatMap(gridImg, palette.Heat(10, 1))
 	pltImg.Add(im)
 
-	pltFT, err := plot.New()
-	if err != nil {
-		panic(err)
-	}
+	pltFT := plot.New()
 
 	gridFT := GridMatrix{mat: amp}
 	h := plotter.NewHeatMap(gridFT, palette.Heat(10, 1))
