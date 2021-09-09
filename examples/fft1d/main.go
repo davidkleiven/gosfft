@@ -25,10 +25,7 @@ func main() {
 	}
 
 	// Plot the signal and the result
-	pltSignal, err := plot.New()
-	if err != nil {
-		panic(err)
-	}
+	pltSignal := plot.New()
 	pltSignal.X.Label.Text = "Time (s)"
 	pltSignal.Y.Label.Text = "Amplitude"
 	pts := make(plotter.XYs, len(data))
@@ -42,7 +39,7 @@ func main() {
 	}
 	pltSignal.Add(l)
 	// Plot the frequency spectrum
-	pltFreq, err := plot.New()
+	pltFreq := plot.New()
 	if err != nil {
 		panic(err)
 	}
