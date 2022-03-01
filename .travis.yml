@@ -12,7 +12,7 @@ script:
 - go build -v ./...
 - go test -v ./... -covermode=count -coverprofile=coverage.out
 - $GOPATH/bin/goveralls -coverprofile=coverage.out -service=travis-ci -repotoken
-  $COVERALLS_TOKEN"
+  $COVERALLS_TOKEN
 - go run examples/fft1d/main.go
 - go run examples/fft2d/main.go
 - go run examples/fft3d/main.go
