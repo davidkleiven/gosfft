@@ -3,7 +3,7 @@ module github.com/davidkleiven/gosfft
 go 1.17
 
 require (
-	gonum.org/v1/gonum v0.15.0
+	gonum.org/v1/gonum v0.15.1
 	gonum.org/v1/plot v0.14.0
 )
 
