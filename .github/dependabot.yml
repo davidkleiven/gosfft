@@ -6,5 +6,6 @@ updates:
     interval: daily
     time: "13:00"
   commit-message:
-      prefix: "MAINT: "
+      prefix: 'chore'
+      include: 'scope'
   open-pull-requests-limit: 10
