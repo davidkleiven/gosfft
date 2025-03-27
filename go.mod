@@ -6,7 +6,7 @@ toolchain go1.23.3
 
 require (
 	gonum.org/v1/gonum v0.16.0
-	gonum.org/v1/plot v0.15.2
+	gonum.org/v1/plot v0.16.0
 )
 
 require (
