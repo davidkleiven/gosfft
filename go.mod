@@ -1,11 +1,9 @@
 module github.com/davidkleiven/gosfft
 
-go 1.23.0
-
-toolchain go1.23.3
+go 1.24.0
 
 require (
-	gonum.org/v1/gonum v0.16.0
+	gonum.org/v1/gonum v0.17.0
 	gonum.org/v1/plot v0.16.0
 )
 
